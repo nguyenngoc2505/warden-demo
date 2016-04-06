@@ -7,4 +7,8 @@ Rails.application.routes.draw do
       resource :confirmations, only: [:show]
     end
   end
+
+  namespace :v1, defaults: {format: :json} do
+    post "welcome", to: "welcome#index"
+  end
 end

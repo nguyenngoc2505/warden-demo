@@ -18,7 +18,11 @@ class UnauthorizedController < ActionController::Metal
       message = env['warden.options'].fetch(:message, "unauthorized.user")
       flash.alert = I18n.t(message)
     end
-
-    redirect_to new_sessions_url
+    if params["authentication_token"]
+      self.response_body = "Unauthorized Action"
+      self.status = :unauthorized
+    else
+      redirect_to new_sessions_url
+    end
   end
 end

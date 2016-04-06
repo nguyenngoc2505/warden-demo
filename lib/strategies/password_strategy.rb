@@ -1,14 +1,19 @@
 class PasswordStrategy < ::Warden::Strategies::Base
   def valid?
-    email || password
+    email || password || authentication_token
   end
 
   def authenticate!
-    user = User.find_by_email email
-    if user.nil? || user.confirmed_at.nil? || user.password != password
-      fail!("Could not log in")
+    if authentication_token
+      user = User.find_by_authentication_token authentication_token
+      user.nil? ? fail!("Could not log in") : success!(user)
     else
-      success! user
+      user = User.find_by_email email
+      if user.nil? || user.confirmed_at.nil? || user.password != password
+        fail!("Could not log in")
+      else
+        success! user
+      end
     end
   end
 
@@ -19,5 +24,9 @@ class PasswordStrategy < ::Warden::Strategies::Base
 
   def password
     params["session"].try :[], "password"
+  end
+
+  def authentication_token
+    params["authentication_token"]
   end
 end
