@@ -40,7 +40,7 @@ module WardenDemo
     end
 
     config.middleware.insert_after ActionDispatch::Flash, Warden::Manager do |manager|
-      manager.default_strategies :password
+      manager.default_strategies :password, :basic_auth
       manager.failure_app = UnauthorizedController
     end
   end
