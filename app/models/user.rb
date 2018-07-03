@@ -2,6 +2,9 @@ require 'bcrypt'
 class User < ActiveRecord::Base
   before_create :generate_confirmation_token
 
+  has_one :admin
+  has_one :corporation
+
   validates_presence_of :email
   include BCrypt
 

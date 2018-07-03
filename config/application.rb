@@ -30,17 +30,28 @@ module WardenDemo
     # config.i18n.default_locale = :de
 
     # Do not swallow errors in after_commit/after_rollback callbacks.
-    config.active_record.raise_in_transactional_callbacks = true
     Warden::Manager.serialize_into_session do |user|
       user.id
     end
-
     Warden::Manager.serialize_from_session do |id|
-      User.find_by_id(id)
+      User.find_by_id id
     end
 
+    Warden::Manager.serialize_into_session(:admin) { |user| user.id }
+    Warden::Manager.serialize_from_session(:admin) { |id| Admin.find_by_id(id) }
+
+    Warden::Manager.serialize_into_session(:corporation) { |user| user.id }
+    Warden::Manager.serialize_from_session(:corporation) { |id| Corporation.find_by_id(id) }
+
+
     config.middleware.insert_after ActionDispatch::Flash, Warden::Manager do |manager|
-      manager.default_strategies :password, :basic_auth
+      manager.default_strategies :password, :basic_auth, :admin_login, :corporation_login
+      manager.default_scope = :user
+
+      manager.scope_defaults :user,        :strategies => [:password]
+      manager.scope_defaults :admin,       :strategies => [:admin_login]
+      manager.scope_defaults :corporation, :strategies => [:corporation_login]
+
       manager.failure_app = UnauthorizedController
     end
   end

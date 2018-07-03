@@ -15,14 +15,21 @@ class UnauthorizedController < ActionController::Metal
 
   def respond
     unless request.get?
-      message = env['warden.options'].fetch(:message, "unauthorized.user")
+      message = request.env['warden.options'].fetch(:message, "unauthorized.user")
       flash.alert = I18n.t(message)
     end
     if params["authentication_token"]
       self.response_body = "Unauthorized Action"
       self.status = :unauthorized
     else
-      redirect_to new_sessions_url
+      case request.subdomain
+      when /^admin/
+        redirect_to admin_login_path
+      when /^corporation/
+        redirect_to corporation_login_path  
+      else
+        redirect_to new_sessions_path
+      end
     end
   end
 end

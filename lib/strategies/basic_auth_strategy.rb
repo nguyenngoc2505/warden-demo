@@ -1,6 +1,5 @@
 class BasicAuthStrategy < ::Warden::Strategies::Base
   def auth
-    binding.pry
     @auth ||= Rack::Auth::Basic::Request.new(env)
   end
 
